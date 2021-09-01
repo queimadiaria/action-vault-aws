@@ -8,10 +8,24 @@ inputs:
   vault_addr:  # ID Service
     description: URL to Vault endpoint
     required: true
+  ssh_key:
+    description: SSH Key with permissions to download repos
+    required: true
 outputs: {}
 runs:
   using: "composite"
   steps:
+    - name: Setup SSH
+      shell: bash
+      env:
+         SSH_KEY: ${{ inputs.ssh_key }}
+      run: |
+        mkdir -p ~/.ssh/
+        cat>~/.ssh/id_ed25519<<EOF
+        ${SSH_KEY}
+        EOF
+        chmod 400 ~/.ssh/id_ed25519
+
     - name: Setup Vault
       shell: bash
       env:
