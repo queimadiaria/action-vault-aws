@@ -11,6 +11,7 @@ inputs:
   ssh_key:
     description: SSH Key with permissions to download repos
     required: true
+    default: ''
 outputs: {}
 runs:
   using: "composite"
