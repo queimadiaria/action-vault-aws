@@ -12,20 +12,22 @@ runs:
     - name: Setup Vault
       shell: bash
       env:
-        VAULT_ADDR: https://vault.prd.queima.me
+        VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
       run: |
-        wget https://releases.hashicorp.com/vault/1.7.3/vault_1.7.3_linux_amd64.zip -O vault.zip \
-        && sudo unzip vault.zip -d /usr/local/bin && rm vault.zip
-        wget https://queima-artifacts.s3.amazonaws.com/awsqueima.zip -O /tmp/awsqueima.zip \
-        && sudo unzip /tmp/awsqueima.zip -d /usr/local/bin \
+        wget -q https://releases.hashicorp.com/vault/1.7.3/vault_1.7.3_linux_amd64.zip -O vault.zip \
+        && sudo unzip -q vault.zip -d /usr/local/bin && rm vault.zip
+
+        wget -q https://queima-artifacts.s3.amazonaws.com/awsqueima.zip -O /tmp/awsqueima.zip \
+        && sudo unzip -q /tmp/awsqueima.zip -d /usr/local/bin \
         && sudo chmod +x /usr/local/bin/awsqueima
+        
         awsqueima -l
 
     - name: Configure AWS Credentials
       shell: bash
       env:
         AWS_ENV: ${{ inputs.awsqueima_environment }}
-        VAULT_ADDR: https://vault.prd.queima.me
+        VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
       run: |
         echo "Login into AWS"
         $(awsqueima -a ${AWS_ENV})
