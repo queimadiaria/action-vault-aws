@@ -5,6 +5,9 @@ inputs:
     description: AWS environment to get credentials for
     required: true
     default: 'main'
+  vault_addr:  # ID Service
+    description: URL to Vault endpoint
+    required: true
 outputs: {}
 runs:
   using: "composite"
@@ -12,7 +15,7 @@ runs:
     - name: Setup Vault
       shell: bash
       env:
-        VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+        VAULT_ADDR: ${{ inputs.vault_addr }}
       run: |
         wget -q https://releases.hashicorp.com/vault/1.7.3/vault_1.7.3_linux_amd64.zip -O vault.zip \
         && sudo unzip -q vault.zip -d /usr/local/bin && rm vault.zip
@@ -27,7 +30,7 @@ runs:
       shell: bash
       env:
         AWS_ENV: ${{ inputs.awsqueima_environment }}
-        VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+        VAULT_ADDR: ${{ inputs.vault_addr }}
       run: |
         echo "Login into AWS"
         $(awsqueima -a ${AWS_ENV})
