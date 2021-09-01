@@ -1,0 +1,38 @@
+name: 'Configure Job Queima Labs'
+description: 'Queima Labs DevOps Stack - Configure Credentials'
+inputs:
+  awsqueima_environment:  # ID Service
+    description: AWS environment to get credentials for
+    required: true
+    default: 'main'
+outputs: {}
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Vault
+      shell: bash
+      env:
+        VAULT_ADDR: https://vault.prd.queima.me
+      run: |
+        wget https://releases.hashicorp.com/vault/1.7.3/vault_1.7.3_linux_amd64.zip -O vault.zip \
+        && sudo unzip vault.zip -d /usr/local/bin && rm vault.zip
+        wget https://queima-artifacts.s3.amazonaws.com/awsqueima.zip -O /tmp/awsqueima.zip \
+        && sudo unzip /tmp/awsqueima.zip -d /usr/local/bin \
+        && sudo chmod +x /usr/local/bin/awsqueima
+        awsqueima -l
+
+    - name: Configure AWS Credentials
+      shell: bash
+      env:
+        AWS_ENV: ${{ inputs.awsqueima_environment }}
+        VAULT_ADDR: https://vault.prd.queima.me
+      run: |
+        echo "Login into AWS"
+        $(awsqueima -a ${AWS_ENV})
+
+        cat>>$GITHUB_ENV<<EOF
+        AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+        AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+        AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+        AWS_REGION=${AWS_DEFAULT_REGION}
+        EOF
