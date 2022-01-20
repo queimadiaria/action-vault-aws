@@ -32,6 +32,7 @@ runs:
       env:
         VAULT_ADDR: ${{ inputs.vault_addr }}
       run: |
+        echo ${VAULT_ADDR}
         wget -q https://releases.hashicorp.com/vault/1.7.3/vault_1.7.3_linux_amd64.zip -O vault.zip \
         && sudo unzip -q vault.zip -d /usr/local/bin && rm vault.zip
 
@@ -39,7 +40,7 @@ runs:
         && sudo unzip -q /tmp/awsqueima.zip -d /usr/local/bin \
         && sudo chmod +x /usr/local/bin/awsqueima
         
-        awsqueima -l
+        awsqueima -l > /dev/null
 
     - name: Configure AWS Credentials
       shell: bash
@@ -48,7 +49,8 @@ runs:
         VAULT_ADDR: ${{ inputs.vault_addr }}
       run: |
         echo "Login into AWS"
-        $(awsqueima -a ${AWS_ENV})
+        echo ${VAULT_ADDR}
+        $(awsqueima -a ${AWS_ENV}) > /dev/null
 
         cat>>$GITHUB_ENV<<EOF
         AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
